@@ -1,18 +1,19 @@
 package com.babelhelloworld.gestionSiniestros.service.strategy.impl;
 
-import org.springframework.stereotype.Service;
-
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
 import com.babelhelloworld.gestionSiniestros.service.strategy.BaseStrategy;
+import org.springframework.stereotype.Service;
 
-@Service
+@Service("ALLIANZ")
 public class AllianzStrategy extends BaseStrategy {
-    
+
+    private Aseguradora aseguradora;
+
     public AllianzStrategy(Aseguradora aseguradora) {
         super(aseguradora);
     }
-    
+
     @Override
     public double calcularValorReal(Bien bien, double añosUso) {
         double añosAjustados = calcularAñosUso(añosUso, aseguradora.isUsaAniosProporcionales());
@@ -25,5 +26,10 @@ public class AllianzStrategy extends BaseStrategy {
         double valor = depreciacionAcumulada(bien.getValorCompra(), porcentajeAnual, añosEnteros);
 
         return valor * (1 + aseguradora.getTasaAumento());
+    }
+
+    @Override
+    public Aseguradora getAseguradora() {
+        return Aseguradora.ALLIANZ;
     }
 }

@@ -3,15 +3,33 @@ package com.babelhelloworld.gestionSiniestros;
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
 import com.babelhelloworld.gestionSiniestros.service.ValoracionService;
-import com.babelhelloworld.gestionSiniestros.service.ValoracionServiceImpl;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Service;
 
 import java.util.Locale;
 import java.util.Scanner;
 
-public class Runner {
-    public static void main(String[] args) {
+@Service
+public class Runner implements CommandLineRunner {
+
+    private final ValoracionService valoracionService;
+
+    public Runner(ValoracionService valoracionService) {
+        this.valoracionService = valoracionService;
+    }
+
+    private static Aseguradora parseAseguradora(String input) {
+        return switch (input) {
+            case "MAPFRE" -> Aseguradora.MAPFRE;
+            case "ALLIANZ" -> Aseguradora.ALLIANZ;
+            case "MUTUA_MADRILENA" -> Aseguradora.MUTUA;
+            default -> Aseguradora.GENERAL;
+        };
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
         try (Scanner sc = new Scanner(System.in)) {
-            ValoracionService valoracionService = new ValoracionServiceImpl();
 
             boolean salir = false;
             while (!salir) {
@@ -60,14 +78,5 @@ public class Runner {
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-    }
-
-    private static Aseguradora parseAseguradora(String input) {
-        return switch (input) {
-            case "MAPFRE" -> Aseguradora.MAPFRE;
-            case "ALLIANZ" -> Aseguradora.ALLIANZ;
-            case "MUTUA_MADRILENA" -> Aseguradora.MUTUA;
-            default -> Aseguradora.GENERAL; 
-        };
     }
 }

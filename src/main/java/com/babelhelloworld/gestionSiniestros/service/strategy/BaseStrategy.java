@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
 
-
+@Service
 public abstract class BaseStrategy implements ValoracionStrategy{
 
     protected Aseguradora aseguradora;

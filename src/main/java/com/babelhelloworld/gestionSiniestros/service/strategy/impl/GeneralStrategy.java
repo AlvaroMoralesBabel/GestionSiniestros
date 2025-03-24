@@ -1,12 +1,11 @@
 package com.babelhelloworld.gestionSiniestros.service.strategy.impl;
 
-import org.springframework.stereotype.Service;
-
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
 import com.babelhelloworld.gestionSiniestros.service.strategy.BaseStrategy;
+import org.springframework.stereotype.Service;
 
-@Service
+@Service("GENERAL")
 public class GeneralStrategy extends BaseStrategy {
 
     public GeneralStrategy(Aseguradora aseguradora) {
@@ -23,6 +22,11 @@ public class GeneralStrategy extends BaseStrategy {
 
         double valor = depreciacionAcumulada(bien.getValorCompra(), porcentajeAnual, añosEnteros);
         return aplicarValorResidual(bien.getValorCompra(), valor);
+    }
+
+    @Override
+    public Aseguradora getAseguradora() {
+        return Aseguradora.GENERAL;
     }
 }
 

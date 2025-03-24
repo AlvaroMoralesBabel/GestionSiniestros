@@ -1,15 +1,13 @@
 package com.babelhelloworld.gestionSiniestros.service.strategy.impl;
 
-import com.babelhelloworld.gestionSiniestros.service.strategy.BaseStrategy;
-
-import org.springframework.stereotype.Service;
-
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
+import com.babelhelloworld.gestionSiniestros.service.strategy.BaseStrategy;
+import org.springframework.stereotype.Service;
 
-@Service
+@Service("MAPFRE")
 public class MapfreStrategy extends BaseStrategy {
-    
+
     public MapfreStrategy(Aseguradora aseguradora) {
         super(aseguradora);
     }
@@ -24,5 +22,10 @@ public class MapfreStrategy extends BaseStrategy {
         double valor = bien.getValorCompra() - depreciacion;
 
         return aplicarValorResidual(bien.getValorCompra(), valor);
+    }
+
+    @Override
+    public Aseguradora getAseguradora() {
+        return Aseguradora.MAPFRE;
     }
 }
