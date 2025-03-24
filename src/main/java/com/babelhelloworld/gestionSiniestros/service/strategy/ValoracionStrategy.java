@@ -1,5 +1,5 @@
 package com.babelhelloworld.gestionSiniestros.service.strategy;
 
 public interface ValoracionStrategy {
-    void calcularValorReal();
+    double calcularValorReal(Bien bien, double añosUso);
 }
