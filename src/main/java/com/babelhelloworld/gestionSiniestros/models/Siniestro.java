@@ -1,5 +1,9 @@
 package com.babelhelloworld.gestionSiniestros.models;
 
+import java.time.LocalDate;
+import org.springframework.stereotype.Component;
+
+@Component
 public class Siniestro {
 
     private LocalDate fechaSiniestro;

@@ -1,5 +1,7 @@
 package com.babelhelloworld.gestionSiniestros.models;
 
+import org.springframework.stereotype.Component;
+
 public enum Aseguradora {
     GENERAL("General", 0.15, true, false, false, 0.0, 1),
     MAPFRE("Mapfre", 0.17, false, false, false, 0.0, 1),

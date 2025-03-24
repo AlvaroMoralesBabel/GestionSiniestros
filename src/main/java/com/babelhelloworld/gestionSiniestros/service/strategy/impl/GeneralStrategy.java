@@ -1,21 +1,28 @@
-package com.babelhelloworld.gestionSiniestros.service.strategy;
+package com.babelhelloworld.gestionSiniestros.service.strategy.impl;
 
-import java.time.Period;
+import org.springframework.stereotype.Service;
 
+import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
+import com.babelhelloworld.gestionSiniestros.models.Bien;
+import com.babelhelloworld.gestionSiniestros.service.strategy.BaseStrategy;
+
+@Service
 public class GeneralStrategy extends BaseStrategy {
+
+    public GeneralStrategy(Aseguradora aseguradora) {
+        super(aseguradora);
+    }
+
     @Override
     public double calcularValorReal(Bien bien, double añosUso) {
-        
-        // Podríamos tener todo este flujo y cada método parametrizado en la BaseStrategy
-         
-         // Obtener años de uso (si en vez de decimales redondean atributo usaAñosProporcionales)
+        double añosAjustados = calcularAñosUso(añosUso, aseguradora.isUsaAniosProporcionales());
+        int añosEnteros = (int) añosAjustados;
 
-         // Comprobar si la aseguradora tiene en cuenta o no el año 0
+        int amortFinal = aplicarMultiplicador(bien.getAñosAmortizacion(), aseguradora.getMultiplicadorAmortizacion());
+        double porcentajeAnual = 1.0 / amortFinal;
 
-         // Ajustar el periodo de amortización (si tienen en cuenta el doble de tiempo)
-
-         // Calcular la depreciación (teniendo en cuenta si es acumulada o no)
-
-         // Comprobar que el valor final no sea menor que el valor residual
+        double valor = depreciacionAcumulada(bien.getValorCompra(), porcentajeAnual, añosEnteros);
+        return aplicarValorResidual(bien.getValorCompra(), valor);
     }
 }
+
