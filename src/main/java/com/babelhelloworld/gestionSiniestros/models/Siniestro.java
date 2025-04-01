@@ -1,16 +1,19 @@
 package com.babelhelloworld.gestionSiniestros.models;
 
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 
-@Component
 public class Siniestro {
 
     private LocalDate fechaSiniestro;
-    private Bien bienAfectado;
-    private String tipoIndemnizacion;
-    private String compania;
+    private LocalTime horaSiniestro;
+    private String descripcion;
+    private String numeroPoliza;
+    private String direccion;
+    private Aseguradora aseguradora;
+    private String tipoIndemnizacion; // "A NUEVO" o "A REAL"
+    private List<Bien> bienesAfectados;
 
     public LocalDate getFechaSiniestro() {
         return fechaSiniestro;
@@ -20,12 +23,44 @@ public class Siniestro {
         this.fechaSiniestro = fechaSiniestro;
     }
 
-    public Bien getBienAfectado() {
-        return bienAfectado;
+    public LocalTime getHoraSiniestro() {
+        return horaSiniestro;
     }
 
-    public void setBienAfectado(Bien bienAfectado) {
-        this.bienAfectado = bienAfectado;
+    public void setHoraSiniestro(LocalTime horaSiniestro) {
+        this.horaSiniestro = horaSiniestro;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public String getNumeroPoliza() {
+        return numeroPoliza;
+    }
+
+    public void setNumeroPoliza(String numeroPoliza) {
+        this.numeroPoliza = numeroPoliza;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public Aseguradora getAseguradora() {
+        return aseguradora;
+    }
+
+    public void setAseguradora(Aseguradora aseguradora) {
+        this.aseguradora = aseguradora;
     }
 
     public String getTipoIndemnizacion() {
@@ -36,11 +71,11 @@ public class Siniestro {
         this.tipoIndemnizacion = tipoIndemnizacion;
     }
 
-    public String getCompania() {
-        return compania;
+    public List<Bien> getBienesAfectados() {
+        return bienesAfectados;
     }
 
-    public void setCompania(String compania) {
-        this.compania = compania;
+    public void setBienesAfectados(List<Bien> bienesAfectados) {
+        this.bienesAfectados = bienesAfectados;
     }
 }

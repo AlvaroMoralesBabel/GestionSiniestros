@@ -7,23 +7,31 @@ import java.time.LocalDate;
 @Component
 public class Bien {
 
-    private String tipo;
+    private String nombre;
+    private TipoBien tipo;
     private double valorCompra;
-    private Integer aniosAmortizacion;
     private LocalDate fechaCompra;
 
-    public Bien(String tipo, double valorCompra, Integer aniosAmortizacion, LocalDate fechaCompra) {
+    public Bien(String nombre, TipoBien tipo, double valorCompra, LocalDate fechaCompra) {
+        this.nombre = nombre;
         this.tipo = tipo;
         this.valorCompra = valorCompra;
-        this.aniosAmortizacion = aniosAmortizacion;
         this.fechaCompra = fechaCompra;
     }
 
-    public String getTipo() {
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public TipoBien getTipo() {
         return tipo;
     }
 
-    public void setTipo(String tipo) {
+    public void setTipo(TipoBien tipo) {
         this.tipo = tipo;
     }
 
@@ -33,14 +41,6 @@ public class Bien {
 
     public void setValorCompra(double valorCompra) {
         this.valorCompra = valorCompra;
-    }
-
-    public Integer getAniosAmortizacion() {
-        return aniosAmortizacion;
-    }
-
-    public void setAniosAmortizacion(Integer aniosAmortizacion) {
-        this.aniosAmortizacion = aniosAmortizacion;
     }
 
     public LocalDate getFechaCompra() {

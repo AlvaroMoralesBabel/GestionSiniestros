@@ -3,19 +3,22 @@ package com.babelhelloworld.gestionSiniestros.service.strategy;
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
 import com.babelhelloworld.gestionSiniestros.models.Siniestro;
+import com.babelhelloworld.gestionSiniestros.service.amortizacion.AmortizacionService;
 
 import java.time.temporal.ChronoUnit;
 
 public abstract class BaseStrategy implements ValoracionStrategy {
 
     protected Aseguradora aseguradora;
+    protected AmortizacionService amortizacionService;
 
-    public BaseStrategy(Aseguradora aseguradora) {
+    public BaseStrategy(Aseguradora aseguradora, AmortizacionService amortizacionService) {
         this.aseguradora = aseguradora;
+        this.amortizacionService = amortizacionService;
     }
 
     @Override
-    public abstract double calcularValorReal(Bien bien, Siniestro siniestro);
+    public abstract double calcularValorReal(Siniestro siniestro);
 
     /**
      * Devuelve la diferencia en años (posiblemente con decimales)

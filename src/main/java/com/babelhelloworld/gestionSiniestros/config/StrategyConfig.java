@@ -1,6 +1,7 @@
 package com.babelhelloworld.gestionSiniestros.config;
 
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
+import com.babelhelloworld.gestionSiniestros.service.amortizacion.AmortizacionService;
 import com.babelhelloworld.gestionSiniestros.service.strategy.ValoracionStrategy;
 import com.babelhelloworld.gestionSiniestros.service.strategy.impl.AllianzStrategy;
 import com.babelhelloworld.gestionSiniestros.service.strategy.impl.GeneralStrategy;
@@ -15,24 +16,30 @@ import java.util.Map;
 @Configuration
 public class StrategyConfig {
 
+    private final AmortizacionService amortizacionService;
+
+    public StrategyConfig(AmortizacionService amortizacionService) {
+        this.amortizacionService = amortizacionService;
+    }
+
     @Bean
     public ValoracionStrategy generalStrategy() {
-        return new GeneralStrategy(Aseguradora.GENERAL);
+        return new GeneralStrategy(Aseguradora.GENERAL, amortizacionService);
     }
 
     @Bean
     public ValoracionStrategy mapfreStrategy() {
-        return new MapfreStrategy(Aseguradora.MAPFRE);
+        return new MapfreStrategy(Aseguradora.MAPFRE, amortizacionService);
     }
 
     @Bean
     public ValoracionStrategy allianzStrategy() {
-        return new AllianzStrategy(Aseguradora.ALLIANZ);
+        return new AllianzStrategy(Aseguradora.ALLIANZ, amortizacionService);
     }
 
     @Bean
     public ValoracionStrategy mutuaStrategy() {
-        return new MutuaStrategy(Aseguradora.MUTUA);
+        return new MutuaStrategy(Aseguradora.MUTUA, amortizacionService);
     }
 
     @Bean

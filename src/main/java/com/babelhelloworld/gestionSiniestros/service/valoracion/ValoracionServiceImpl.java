@@ -1,4 +1,4 @@
-package com.babelhelloworld.gestionSiniestros.service;
+package com.babelhelloworld.gestionSiniestros.service.valoracion;
 
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Siniestro;
@@ -17,8 +17,8 @@ public class ValoracionServiceImpl implements ValoracionService {
     }
 
     @Override
-    public double calcular(Siniestro siniestro, Aseguradora aseguradora) {
-        ValoracionStrategy strategy = strategyMap.getOrDefault(aseguradora, strategyMap.get(Aseguradora.GENERAL));
-        return strategy.calcularValorReal(siniestro.getBienAfectado(), siniestro);
+    public double calcular(Siniestro siniestro) {
+        ValoracionStrategy strategy = strategyMap.getOrDefault(siniestro.getAseguradora(), strategyMap.get(Aseguradora.GENERAL));
+        return strategy.calcularValorReal(siniestro);
     }
 }
