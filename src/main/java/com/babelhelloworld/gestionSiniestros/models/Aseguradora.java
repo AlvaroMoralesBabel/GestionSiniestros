@@ -2,6 +2,7 @@ package com.babelhelloworld.gestionSiniestros.models;
 
 import org.springframework.stereotype.Component;
 
+@Component
 public enum Aseguradora {
     GENERAL("General", 0.15, true, false, false, 0.0, 1),
     MAPFRE("Mapfre", 0.17, false, false, false, 0.0, 1),
@@ -17,13 +18,13 @@ public enum Aseguradora {
     private final int multiplicadorAmortizacion;
 
     Aseguradora(
-        String nombre,
-        double valorResidual,
-        boolean depreciacionAcumulada,
-        boolean cuentaPrimerAnio,
-        boolean usaAniosProporcionales,
-        double tasaAumento,
-        int multiplicadorAmortizacion
+            String nombre,
+            double valorResidual,
+            boolean depreciacionAcumulada,
+            boolean cuentaPrimerAnio,
+            boolean usaAniosProporcionales,
+            double tasaAumento,
+            int multiplicadorAmortizacion
     ) {
         this.nombre = nombre;
         this.valorResidual = valorResidual;
@@ -34,11 +35,31 @@ public enum Aseguradora {
         this.multiplicadorAmortizacion = multiplicadorAmortizacion;
     }
 
-    public String getNombre() { return nombre; }
-    public double getValorResidual() { return valorResidual; }
-    public boolean isDepreciacionAcumulada() { return depreciacionAcumulada; }
-    public boolean isCuentaPrimerAnio() { return cuentaPrimerAnio; }
-    public boolean isUsaAniosProporcionales() { return usaAniosProporcionales; }
-    public double getTasaAumento() { return tasaAumento; }
-    public int getMultiplicadorAmortizacion() { return multiplicadorAmortizacion; }
+    public String getNombre() {
+        return nombre;
+    }
+
+    public double getValorResidual() {
+        return valorResidual;
+    }
+
+    public boolean isDepreciacionAcumulada() {
+        return depreciacionAcumulada;
+    }
+
+    public boolean isCuentaPrimerAnio() {
+        return cuentaPrimerAnio;
+    }
+
+    public boolean isUsaAniosProporcionales() {
+        return usaAniosProporcionales;
+    }
+
+    public double getTasaAumento() {
+        return tasaAumento;
+    }
+
+    public int getMultiplicadorAmortizacion() {
+        return multiplicadorAmortizacion;
+    }
 }
