@@ -1,29 +1,24 @@
 package com.babelhelloworld.gestionSiniestros.service;
 
+import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
+import com.babelhelloworld.gestionSiniestros.models.Siniestro;
+import com.babelhelloworld.gestionSiniestros.service.strategy.ValoracionStrategy;
 import org.springframework.stereotype.Service;
 
-import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
-import com.babelhelloworld.gestionSiniestros.models.Bien;
-import com.babelhelloworld.gestionSiniestros.service.strategy.ValoracionStrategy;
-import com.babelhelloworld.gestionSiniestros.service.strategy.impl.AllianzStrategy;
-import com.babelhelloworld.gestionSiniestros.service.strategy.impl.GeneralStrategy;
-import com.babelhelloworld.gestionSiniestros.service.strategy.impl.MapfreStrategy;
-import com.babelhelloworld.gestionSiniestros.service.strategy.impl.MutuaStrategy;
+import java.util.Map;
 
 @Service
 public class ValoracionServiceImpl implements ValoracionService {
 
-    @Override
-    public double calcular(Bien bien, double añosUso, Aseguradora aseguradora){
-        return getStrategy(aseguradora).calcularValorReal(bien, añosUso);
+    private final Map<Aseguradora, ValoracionStrategy> strategyMap;
+
+    public ValoracionServiceImpl(Map<Aseguradora, ValoracionStrategy> strategyMap) {
+        this.strategyMap = strategyMap;
     }
 
-    private ValoracionStrategy getStrategy(Aseguradora aseguradora) {
-        return switch (aseguradora) {
-            case MAPFRE -> new MapfreStrategy(aseguradora);
-            case ALLIANZ -> new AllianzStrategy(aseguradora);
-            case MUTUA -> new MutuaStrategy(aseguradora);
-            default -> new GeneralStrategy(aseguradora);
-        };
+    @Override
+    public double calcular(Siniestro siniestro, Aseguradora aseguradora) {
+        ValoracionStrategy strategy = strategyMap.getOrDefault(aseguradora, strategyMap.get(Aseguradora.GENERAL));
+        return strategy.calcularValorReal(siniestro.getBienAfectado(), siniestro);
     }
 }

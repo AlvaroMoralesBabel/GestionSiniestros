@@ -1,12 +1,12 @@
 package com.babelhelloworld.gestionSiniestros.service.strategy;
 
-import org.springframework.stereotype.Service;
-
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
+import com.babelhelloworld.gestionSiniestros.models.Siniestro;
 
+import java.time.temporal.ChronoUnit;
 
-public abstract class BaseStrategy implements ValoracionStrategy{
+public abstract class BaseStrategy implements ValoracionStrategy {
 
     protected Aseguradora aseguradora;
 
@@ -15,39 +15,70 @@ public abstract class BaseStrategy implements ValoracionStrategy{
     }
 
     @Override
-    public abstract double calcularValorReal(Bien bien, double añosUso);
+    public abstract double calcularValorReal(Bien bien, Siniestro siniestro);
 
-    protected double aplicarValorResidual(double valorCompra, double valorCalculado) {
-        if (aseguradora.getValorResidual() == 0) return valorCalculado;
-        double residual = valorCompra * aseguradora.getValorResidual();
-        return Math.max(residual, valorCalculado);
-    }
-
-    protected double calcularAñosUso(double añosUso, boolean usaAñosProporcionales){
-        if(!usaAñosProporcionales){
-            return (int) añosUso;
+    /**
+     * Devuelve la diferencia en años (posiblemente con decimales)
+     * entre la fechaCompra del bien y la fechaSiniestro.
+     */
+    protected double getAniosTranscurridos(Bien bien, Siniestro siniestro) {
+        if (bien.getFechaCompra() == null || siniestro.getFechaSiniestro() == null) {
+            return 0.0;
         }
-        return añosUso;
+        long daysBetween = ChronoUnit.DAYS.between(
+                bien.getFechaCompra(),
+                siniestro.getFechaSiniestro()
+        );
+        return daysBetween / 365.0;
     }
 
-    protected double aplicarPrimerAño(double añosUso, boolean isCuentaPrimerAño){
-        if(isCuentaPrimerAño && añosUso < 1){
+    /**
+     * Si la compañía no usa años proporcionales, se trunca a entero.
+     */
+    protected double calcularAniosUso(double anios, boolean usaAniosProporcionales) {
+        if (!usaAniosProporcionales) {
+            return (int) anios;
+        }
+        return anios;
+    }
+
+    /**
+     * Si se cuenta el primer año completo, y aniosUso < 1, forzamos a 1.0
+     */
+    protected double aplicarPrimerAnio(double anios, boolean cuentaPrimerAnio) {
+        if (cuentaPrimerAnio && anios < 1) {
             return 1.0;
         }
-        return añosUso;
+        return anios;
     }
 
-    protected double depreciacionAcumulada(double valorInicial, double porcentajeAnual, int añosEnteros){
+    /**
+     * Depreciación acumulada año a año para 'añosEnteros'.
+     */
+    protected double depreciacionAcumulada(double valorInicial, double porcentajeAnual, int añosEnteros) {
         double valor = valorInicial;
-
-        for(int i = 0; i < añosEnteros; i++){
-            valor -= valor * porcentajeAnual;
+        for (int i = 0; i < añosEnteros; i++) {
+            valor -= (valor * porcentajeAnual);
         }
-
         return valor;
     }
 
+    /**
+     * Aplica un multiplicador a los años de amortización (ej. Mutua: *2).
+     */
     protected int aplicarMultiplicador(int aniosAmortOriginal, int multiplicador) {
         return aniosAmortOriginal * multiplicador;
+    }
+
+    /**
+     * Aplica valor residual según el % en la Aseguradora.
+     */
+    protected double aplicarValorResidual(double valorCompra, double valorCalculado) {
+        double residualPct = aseguradora.getValorResidual();
+        if (residualPct <= 0) {
+            return valorCalculado;
+        }
+        double residual = valorCompra * residualPct;
+        return Math.max(residual, valorCalculado);
     }
 }

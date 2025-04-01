@@ -2,16 +2,21 @@ package com.babelhelloworld.gestionSiniestros.models;
 
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 @Component
 public class Bien {
+
     private String tipo;
     private double valorCompra;
-    private Integer añosAmortizacion;
+    private Integer aniosAmortizacion;
+    private LocalDate fechaCompra;
 
-    public Bien(String tipo, double valorCompra, Integer añosAmortizacion) {
+    public Bien(String tipo, double valorCompra, Integer aniosAmortizacion, LocalDate fechaCompra) {
         this.tipo = tipo;
         this.valorCompra = valorCompra;
-        this.añosAmortizacion = añosAmortizacion;
+        this.aniosAmortizacion = aniosAmortizacion;
+        this.fechaCompra = fechaCompra;
     }
 
     public String getTipo() {
@@ -30,11 +35,19 @@ public class Bien {
         this.valorCompra = valorCompra;
     }
 
-    public Integer getAñosAmortizacion() {
-        return añosAmortizacion;
+    public Integer getAniosAmortizacion() {
+        return aniosAmortizacion;
     }
 
-    public void setAñosAmortizacion(Integer añosAmortizacion) {
-        this.añosAmortizacion = añosAmortizacion;
+    public void setAniosAmortizacion(Integer aniosAmortizacion) {
+        this.aniosAmortizacion = aniosAmortizacion;
+    }
+
+    public LocalDate getFechaCompra() {
+        return fechaCompra;
+    }
+
+    public void setFechaCompra(LocalDate fechaCompra) {
+        this.fechaCompra = fechaCompra;
     }
 }

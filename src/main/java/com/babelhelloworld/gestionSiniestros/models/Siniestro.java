@@ -1,7 +1,8 @@
 package com.babelhelloworld.gestionSiniestros.models;
 
-import java.time.LocalDate;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
 
 @Component
 public class Siniestro {
@@ -11,28 +12,35 @@ public class Siniestro {
     private String tipoIndemnizacion;
     private String compania;
 
-    public LocalDate getFechaSiniestro() { 
-        return fechaSiniestro; 
-        }
-    public void setFechaSiniestro(LocalDate fechaSiniestro) { 
-        this.fechaSiniestro = fechaSiniestro; }
-    public Bien getBienAfectado() { 
-        return bienAfectado; 
-        }
-    public void setBienAfectado(Bien bienAfectado) { 
-        this.bienAfectado = bienAfectado; 
-        }
-    public String getTipoIndemnizacion() { 
-        return tipoIndemnizacion; 
-        }
-    public void setTipoIndemnizacion(String tipoIndemnizacion) { 
-        this.tipoIndemnizacion = tipoIndemnizacion; }
+    public LocalDate getFechaSiniestro() {
+        return fechaSiniestro;
+    }
 
-    public String getCompania() { 
-        return compania; 
-        }
+    public void setFechaSiniestro(LocalDate fechaSiniestro) {
+        this.fechaSiniestro = fechaSiniestro;
+    }
 
-    public void setCompania(String compania) { 
-        this.compania = compania; 
-        }
+    public Bien getBienAfectado() {
+        return bienAfectado;
+    }
+
+    public void setBienAfectado(Bien bienAfectado) {
+        this.bienAfectado = bienAfectado;
+    }
+
+    public String getTipoIndemnizacion() {
+        return tipoIndemnizacion;
+    }
+
+    public void setTipoIndemnizacion(String tipoIndemnizacion) {
+        this.tipoIndemnizacion = tipoIndemnizacion;
+    }
+
+    public String getCompania() {
+        return compania;
+    }
+
+    public void setCompania(String compania) {
+        this.compania = compania;
+    }
 }

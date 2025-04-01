@@ -2,21 +2,29 @@ package com.babelhelloworld.gestionSiniestros;
 
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
+import com.babelhelloworld.gestionSiniestros.models.Siniestro;
 import com.babelhelloworld.gestionSiniestros.service.ValoracionService;
-import com.babelhelloworld.gestionSiniestros.service.ValoracionServiceImpl;
+import org.springframework.boot.CommandLineRunner;
 
+import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Scanner;
 
-public class Runner {
-    public static void main(String[] args) {
-        try (Scanner sc = new Scanner(System.in)) {
-            ValoracionService valoracionService = new ValoracionServiceImpl();
+public class Runner implements CommandLineRunner {
 
+    private final ValoracionService valoracionService;
+
+    public Runner(ValoracionService valoracionService) {
+        this.valoracionService = valoracionService;
+    }
+
+    @Override
+    public void run(String... args) {
+        try (Scanner sc = new Scanner(System.in)) {
             boolean salir = false;
             while (!salir) {
                 System.out.println("\n=== GESTIÓN DE SINIESTROS ===");
-                System.out.println("1. Calcular valor real de un bien");
+                System.out.println("1. Calcular valor real de un bien (fecha)");
                 System.out.println("2. Salir");
                 System.out.print("Elige una opción: ");
 
@@ -32,10 +40,17 @@ public class Runner {
                         System.out.print("Introduce los años de amortización (entero): ");
                         int aniosAmort = Integer.parseInt(sc.nextLine());
 
-                        Bien bien = new Bien(tipoBien, valorCompra, aniosAmort);
+                        System.out.print("Introduce la fecha de compra (yyyy-MM-dd): ");
+                        LocalDate fechaCompra = LocalDate.parse(sc.nextLine());
 
-                        System.out.print("Introduce los años de uso (puede ser decimal, ej. 1.5): ");
-                        double aniosUso = Double.parseDouble(sc.nextLine());
+                        Bien bien = new Bien(tipoBien, valorCompra, aniosAmort, fechaCompra);
+
+                        System.out.print("Introduce la fecha del siniestro (yyyy-MM-dd): ");
+                        LocalDate fechaSiniestro = LocalDate.parse(sc.nextLine());
+
+                        Siniestro siniestro = new Siniestro();
+                        siniestro.setBienAfectado(bien);
+                        siniestro.setFechaSiniestro(fechaSiniestro);
 
                         System.out.println("¿Qué compañía aseguradora?");
                         System.out.println(" - GENERAL\n - MAPFRE\n - ALLIANZ\n - MUTUA_MADRILENA");
@@ -44,7 +59,7 @@ public class Runner {
 
                         Aseguradora aseguradora = parseAseguradora(compania);
 
-                        double valorReal = valoracionService.calcular(bien, aniosUso, aseguradora);
+                        double valorReal = valoracionService.calcular(siniestro, aseguradora);
 
                         System.out.println("Valor real calculado: " + valorReal + " €");
                     }
@@ -57,17 +72,17 @@ public class Runner {
                     }
                 }
             }
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static Aseguradora parseAseguradora(String input) {
+    private Aseguradora parseAseguradora(String input) {
         return switch (input) {
             case "MAPFRE" -> Aseguradora.MAPFRE;
             case "ALLIANZ" -> Aseguradora.ALLIANZ;
             case "MUTUA_MADRILENA" -> Aseguradora.MUTUA;
-            default -> Aseguradora.GENERAL; 
+            default -> Aseguradora.GENERAL;
         };
     }
 }
