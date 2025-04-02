@@ -8,9 +8,6 @@ import com.babelhelloworld.gestionSiniestros.service.strategy.BaseStrategy;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
 public class MapfreStrategy extends BaseStrategy {
 
@@ -28,25 +25,27 @@ public class MapfreStrategy extends BaseStrategy {
     }
 
     @Override
-    public Map<Bien, Double> calcularValorReal(Siniestro siniestro) {
-        Map<Bien, Double> resultado = new HashMap<>();
+    public double calcularValorReal(Siniestro siniestro, int i) {
+        validarSiniestro(siniestro);
+        double resultado;
 
-        for (Bien bien : siniestro.getBienesAfectados()) {
-            double anios = getAniosTranscurridos(bien, siniestro);
-            double aniosAjustados = calcularAniosUso(anios, aseguradora.isUsaAniosProporcionales());
-            aniosAjustados = aplicarPrimerAnio(aniosAjustados, aseguradora.isCuentaPrimerAnio());
+        Bien bien = siniestro.getBienesAfectados().get(i);
+        validarBien(bien, siniestro);
+        double anios = getAniosTranscurridos(bien, siniestro);
+        double aniosAjustados = calcularAniosUso(anios, aseguradora.isUsaAniosProporcionales());
+        aniosAjustados = aplicarPrimerAnio(aniosAjustados, aseguradora.isCuentaPrimerAnio());
 
-            int amort = aplicarMultiplicador(
-                    amortizacionService.obtenerAniosAmortizacion(bien),
-                    aseguradora.getMultiplicadorAmortizacion()
-            );
-            double porcAnual = 1.0 / amort;
+        int amort = aplicarMultiplicador(
+                amortizacionService.obtenerAniosAmortizacion(bien),
+                aseguradora.getMultiplicadorAmortizacion()
+        );
+        double porcAnual = 1.0 / amort;
 
-            double depreciacion = bien.getValorCompra() * porcAnual * aniosAjustados;
-            double valor = bien.getValorCompra() - depreciacion;
+        double depreciacion = bien.getValorCompra() * porcAnual * aniosAjustados;
+        double valor = bien.getValorCompra() - depreciacion;
 
-            resultado.put(bien, aplicarValorResidual(bien.getValorCompra(), valor, aseguradora.getValorResidual()));
-        }
+        resultado = (aplicarValorResidual(bien.getValorCompra(), valor, aseguradora.getValorResidual()));
+
 
         return resultado;
     }

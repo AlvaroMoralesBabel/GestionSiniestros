@@ -1,0 +1,10 @@
+=== INFORME DEL SINIESTRO ===
+Póliza: 1
+Fecha siniestro: 2024-01-01
+Dirección: 1
+Aseguradora: General
+Tipo indemnización: A_REAL
+Bienes afectados: 1
+Valor por cada bien:
+ - 1: 316,41€ 
+Valor total: 316,41€ 

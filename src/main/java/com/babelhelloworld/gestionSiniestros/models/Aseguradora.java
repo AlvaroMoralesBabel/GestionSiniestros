@@ -1,10 +1,10 @@
 package com.babelhelloworld.gestionSiniestros.models;
 
 public enum Aseguradora {
-    GENERAL("General", 0.15, true, false, false, 0.0, 1, 5),
-    MAPFRE("Mapfre", 0.17, false, false, false, 0.0, 1, 6),
-    ALLIANZ("Allianz", 0.0, true, false, false, 0.05, 1, 4),
-    MUTUA("Mutua Madrileña", 0.10, true, true, true, 0.0, 2, 3);
+    GENERAL("General", 0.15, true, false, false, 0.0, 1),
+    MAPFRE("Mapfre", 0.17, false, false, false, 0.0, 1),
+    ALLIANZ("Allianz", 0.0, true, false, false, 0.05, 1),
+    MUTUA("Mutua Madrileña", 0.10, true, true, true, 0.0, 2);
 
     private final String nombre;
     private final double valorResidual;
@@ -13,7 +13,6 @@ public enum Aseguradora {
     private final boolean usaAniosProporcionales;
     private final double tasaAumento;
     private final int multiplicadorAmortizacion;
-    private final int aniosAmortizacion;
 
     Aseguradora(
             String nombre,
@@ -22,8 +21,7 @@ public enum Aseguradora {
             boolean cuentaPrimerAnio,
             boolean usaAniosProporcionales,
             double tasaAumento,
-            int multiplicadorAmortizacion,
-            int aniosAmortizacion
+            int multiplicadorAmortizacion
     ) {
         this.nombre = nombre;
         this.valorResidual = valorResidual;
@@ -32,7 +30,6 @@ public enum Aseguradora {
         this.usaAniosProporcionales = usaAniosProporcionales;
         this.tasaAumento = tasaAumento;
         this.multiplicadorAmortizacion = multiplicadorAmortizacion;
-        this.aniosAmortizacion = aniosAmortizacion;
     }
 
     public String getNombre() {
@@ -63,7 +60,4 @@ public enum Aseguradora {
         return multiplicadorAmortizacion;
     }
 
-    public int getAniosAmortizacion() {
-        return aniosAmortizacion;
-    }
 }

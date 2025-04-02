@@ -1,10 +1,7 @@
 package com.babelhelloworld.gestionSiniestros.models;
 
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 
-@Component
 public class Bien {
 
     private String nombre;
@@ -49,5 +46,11 @@ public class Bien {
 
     public void setFechaCompra(LocalDate fechaCompra) {
         this.fechaCompra = fechaCompra;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s (tipo: %s, valor: %.2f, compra: %s)",
+                nombre, tipo, valorCompra, fechaCompra);
     }
 }

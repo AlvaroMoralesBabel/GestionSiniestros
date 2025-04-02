@@ -1,6 +1,9 @@
 package com.babelhelloworld.gestionSiniestros.service.strategy.impl;
 
 import com.babelhelloworld.gestionSiniestros.exceptions.FechaInvalidaException;
+import com.babelhelloworld.gestionSiniestros.exceptions.SiniestroSinBienesException;
+import com.babelhelloworld.gestionSiniestros.exceptions.TipoIndemnizacionInvalidoException;
+import com.babelhelloworld.gestionSiniestros.exceptions.ValorCompraNegativoException;
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
 import com.babelhelloworld.gestionSiniestros.models.Siniestro;
@@ -10,13 +13,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,11 +40,7 @@ class AllianzStrategyTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0} => valor={1}, aniosMock={2}, feCompra={3}, feSin={4}, esperado={5}")
-    @CsvSource({
-            "AUTOMOVIL, 2000, 4, 2030-01-01, 2032-01-01, 1181.25",
-            "ELECTRODOMESTICO, 1000, 6, 2030-01-01, 2030-01-01, 1050.0",
-            "INFORMATICA, 1500, 4, 2025-01-01, 2030-01-01, 373.7548828125"
-    })
+    @CsvFileSource(resources = "/estrategias/allianz/normal_cases_test.csv", numLinesToSkip = 1)
     @DisplayName("AllianzStrategy: varios escenarios (normal, residual...)")
     void calcularValorReal_EscenariosParametrizados(
             TipoBien tipoBien,
@@ -51,21 +50,14 @@ class AllianzStrategyTest {
             String fechaSiniestro,
             double esperado
     ) {
-        // Arrange
         Bien bien = new Bien("BienTest", tipoBien, valorCompra, LocalDate.parse(fechaCompra));
-        Siniestro siniestro = new Siniestro();
-        siniestro.setAseguradora(Aseguradora.ALLIANZ);
-        siniestro.setFechaSiniestro(LocalDate.parse(fechaSiniestro));
-        siniestro.setBienesAfectados(List.of(bien));
+        Siniestro siniestro = crearSiniestroOK(List.of(bien), fechaSiniestro, "A_REAL");
 
         when(allianzAmortizacionService.obtenerAniosAmortizacion(eq(bien))).thenReturn(aniosAmortMock);
 
-        // Act
-        Map<Bien, Double> resultado = allianzStrategy.calcularValorReal(siniestro);
-        double valorCalculado = resultado.get(bien);
+        double resultado = allianzStrategy.calcularValorReal(siniestro, 0);
 
-        // Assert
-        assertEquals(esperado, valorCalculado, 0.0001);
+        assertEquals(esperado, resultado, 0.0001, "Debería calcular correctamente el valor real esperado");
     }
 
     @ParameterizedTest(name = "[{index}] Falla si {1} < {2}")
@@ -75,18 +67,60 @@ class AllianzStrategyTest {
     })
     @DisplayName("AllianzStrategy: lanza excepción si fecha siniestro < fecha compra")
     void calcularValorReal_FechaInvalida(TipoBien tipoBien, String fechaSin, String fechaCompra) {
-        // Arrange
         Bien bien = new Bien("BienTest", tipoBien, 1000.0, LocalDate.parse(fechaCompra));
-        Siniestro siniestro = new Siniestro();
-        siniestro.setAseguradora(Aseguradora.ALLIANZ);
-        siniestro.setFechaSiniestro(LocalDate.parse(fechaSin));
-        siniestro.setBienesAfectados(List.of(bien));
+        Siniestro siniestro = crearSiniestroOK(List.of(bien), fechaSin, "A_REAL");
 
-        when(allianzAmortizacionService.obtenerAniosAmortizacion(eq(bien))).thenReturn(5);
+        assertThrows(FechaInvalidaException.class, () -> allianzStrategy.calcularValorReal(siniestro, 0),
+                "Debería lanzar excepción si fecha siniestro < fecha compra");
+    }
 
-        // Act & Assert
-        assertThrows(FechaInvalidaException.class, () -> {
-            allianzStrategy.calcularValorReal(siniestro);
-        });
+    @DisplayName("AllianzStrategy: lanza excepción si siniestro no tiene bienes")
+    @ParameterizedTest
+    @CsvSource({
+            "A_REAL",
+            "A_NUEVO"
+    })
+    void calcularValorReal_SiniestroSinBienes(String tipoIndemnizacion) {
+        Siniestro siniestro = crearSiniestroOK(List.of(), "2030-01-01", tipoIndemnizacion);
+        assertThrows(SiniestroSinBienesException.class, () -> allianzStrategy.calcularValorReal(siniestro, 1),
+                "Debería lanzar excepción si siniestro no tiene bienes");
+    }
+
+    @DisplayName("AllianzStrategy: lanza excepción si un bien tiene valorCompra < 0")
+    @ParameterizedTest
+    @CsvSource({
+            "AUTOMOVIL, -500",
+            "INFORMATICA, -1"
+    })
+    void calcularValorReal_ValorCompraNegativo(TipoBien tipoBien, double valorNegativo) {
+        Bien bien = new Bien("BienNeg", tipoBien, valorNegativo, LocalDate.parse("2025-01-01"));
+        Siniestro siniestro = crearSiniestroOK(List.of(bien), "2030-01-01", "A_NUEVO");
+
+        assertThrows(ValorCompraNegativoException.class, () -> allianzStrategy.calcularValorReal(siniestro, 0),
+                "Debería lanzar excepción si valor de compra < 0");
+    }
+
+    @DisplayName("AllianzStrategy: lanza excepción si tipo indemnización es inválido")
+    @ParameterizedTest
+    @CsvSource({
+            "A_NORMAL",
+            "TOTAL",
+            "A_NULL"
+    })
+    void calcularValorReal_TipoIndemnizacionInvalida(String tipoInvalido) {
+        Bien bien = new Bien("BienTest", TipoBien.AUTOMOVIL, 1000.0, LocalDate.of(2025, 1, 1));
+        Siniestro siniestro = crearSiniestroOK(List.of(bien), "2030-01-01", tipoInvalido);
+
+        assertThrows(TipoIndemnizacionInvalidoException.class, () -> allianzStrategy.calcularValorReal(siniestro, 1),
+                "Debería lanzar excepción si tipo indemnización no es A_REAL/A_NUEVO");
+    }
+
+    private Siniestro crearSiniestroOK(List<Bien> bienes, String fechaSiniestro, String tipoIndemnizacion) {
+        Siniestro sin = new Siniestro();
+        sin.setAseguradora(Aseguradora.ALLIANZ);
+        sin.setFechaSiniestro(LocalDate.parse(fechaSiniestro));
+        sin.setBienesAfectados(bienes);
+        sin.setTipoIndemnizacion(tipoIndemnizacion);
+        return sin;
     }
 }
