@@ -3,6 +3,7 @@ package com.babelhelloworld.gestionSiniestros.service;
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
 import com.babelhelloworld.gestionSiniestros.models.Siniestro;
+import com.babelhelloworld.gestionSiniestros.models.TipoBien;
 import com.babelhelloworld.gestionSiniestros.service.strategy.ValoracionStrategy;
 import com.babelhelloworld.gestionSiniestros.service.valoracion.ValoracionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.LocalDate;
-import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class ValoracionServiceImplTest {
@@ -32,69 +33,72 @@ class ValoracionServiceImplTest {
         allianzStrategy = Mockito.mock(ValoracionStrategy.class);
         mutuaStrategy = Mockito.mock(ValoracionStrategy.class);
 
-        Map<Aseguradora, ValoracionStrategy> strategyMap = new EnumMap<>(Aseguradora.class);
-        strategyMap.put(Aseguradora.GENERAL, generalStrategy);
-        strategyMap.put(Aseguradora.MAPFRE, mapfreStrategy);
-        strategyMap.put(Aseguradora.ALLIANZ, allianzStrategy);
-        strategyMap.put(Aseguradora.MUTUA, mutuaStrategy);
+        when(generalStrategy.getAseguradora()).thenReturn(Aseguradora.GENERAL);
+        when(mapfreStrategy.getAseguradora()).thenReturn(Aseguradora.MAPFRE);
+        when(allianzStrategy.getAseguradora()).thenReturn(Aseguradora.ALLIANZ);
+        when(mutuaStrategy.getAseguradora()).thenReturn(Aseguradora.MUTUA);
 
-        valoracionService = new ValoracionServiceImpl(strategyMap);
+        List<ValoracionStrategy> strategyList = List.of(
+                generalStrategy, mapfreStrategy, allianzStrategy, mutuaStrategy
+        );
+
+        valoracionService = new ValoracionServiceImpl(strategyList);
     }
 
     @Test
     void calcular_conMapfreUsaMapfreStrategy() {
-        // Arrange
         Siniestro siniestro = new Siniestro();
-        Bien bien = new Bien("Tablet", 2000, 4, LocalDate.of(2025, 1, 1));
-        siniestro.setBienAfectado(bien);
+        siniestro.setAseguradora(Aseguradora.MAPFRE);
+        Bien bien = new Bien("Tablet", TipoBien.INFORMATICA, 2000, LocalDate.of(2025, 1, 1));
+        siniestro.setBienesAfectados(List.of(bien));
         siniestro.setFechaSiniestro(LocalDate.of(2026, 6, 1));
 
-        when(mapfreStrategy.calcularValorReal(any(Bien.class), any(Siniestro.class))).thenReturn(123.45);
+        Map<Bien, Double> mapaMock = Map.of(bien, 123.45);
+        when(mapfreStrategy.calcularValorReal(eq(siniestro))).thenReturn(mapaMock);
 
-        // Act
-        double resultado = valoracionService.calcular(siniestro, Aseguradora.MAPFRE);
+        Map<Bien, Double> resultado = valoracionService.calcular(siniestro);
 
-        // Assert
-        verify(mapfreStrategy, times(1)).calcularValorReal(eq(bien), eq(siniestro));
-        verifyNoInteractions(generalStrategy, allianzStrategy, mutuaStrategy);
-        assertEquals(123.45, resultado, 0.0001);
+        verify(mapfreStrategy, times(1)).calcularValorReal(eq(siniestro));
+
+        assertEquals(123.45, resultado.get(bien), 0.0001);
+        assertEquals(1, resultado.size());
     }
 
     @Test
     void calcular_conAllianzUsaAllianzStrategy() {
-        // Arrange
         Siniestro siniestro = new Siniestro();
-        Bien bien = new Bien("Móvil", 1000, 2, LocalDate.of(2030, 1, 1));
-        siniestro.setBienAfectado(bien);
+        siniestro.setAseguradora(Aseguradora.ALLIANZ);
+        Bien bien = new Bien("Móvil", TipoBien.INFORMATICA, 1000, LocalDate.of(2030, 1, 1));
+        siniestro.setBienesAfectados(List.of(bien));
         siniestro.setFechaSiniestro(LocalDate.of(2031, 1, 1));
 
-        when(allianzStrategy.calcularValorReal(any(Bien.class), any(Siniestro.class))).thenReturn(200.0);
+        Map<Bien, Double> mapaMock = Map.of(bien, 200.0);
+        when(allianzStrategy.calcularValorReal(eq(siniestro))).thenReturn(mapaMock);
 
-        // Act
-        double resultado = valoracionService.calcular(siniestro, Aseguradora.ALLIANZ);
+        Map<Bien, Double> resultado = valoracionService.calcular(siniestro);
 
-        // Assert
-        verify(allianzStrategy, times(1)).calcularValorReal(eq(bien), eq(siniestro));
-        verifyNoInteractions(generalStrategy, mapfreStrategy, mutuaStrategy);
-        assertEquals(200.0, resultado, 0.0001);
+        verify(allianzStrategy, times(1)).calcularValorReal(eq(siniestro));
+
+        assertEquals(200.0, resultado.get(bien), 0.0001);
+        assertEquals(1, resultado.size());
     }
 
     @Test
     void calcular_conAseguradoraInexistente_usaGeneralStrategy() {
-        // Arrange
         Siniestro siniestro = new Siniestro();
-        Bien bien = new Bien("PC", 1500, 3, LocalDate.of(2030, 1, 1));
-        siniestro.setBienAfectado(bien);
+        siniestro.setAseguradora(null); // Aseguradora inexistente
+        Bien bien = new Bien("PC", TipoBien.INFORMATICA, 1500, LocalDate.of(2030, 1, 1));
+        siniestro.setBienesAfectados(List.of(bien));
         siniestro.setFechaSiniestro(LocalDate.of(2032, 1, 1));
 
-        when(generalStrategy.calcularValorReal(any(Bien.class), any(Siniestro.class))).thenReturn(999.9);
+        Map<Bien, Double> mapaMock = Map.of(bien, 999.9);
+        when(generalStrategy.calcularValorReal(eq(siniestro))).thenReturn(mapaMock);
 
-        // Act
-        double resultado = valoracionService.calcular(siniestro, null);
+        Map<Bien, Double> resultado = valoracionService.calcular(siniestro);
 
-        // Assert
-        verify(generalStrategy, times(1)).calcularValorReal(eq(bien), eq(siniestro));
-        verifyNoInteractions(mapfreStrategy, allianzStrategy, mutuaStrategy);
-        assertEquals(999.9, resultado, 0.0001);
+        verify(generalStrategy, times(1)).calcularValorReal(eq(siniestro));
+
+        assertEquals(999.9, resultado.get(bien), 0.0001);
+        assertEquals(1, resultado.size());
     }
 }

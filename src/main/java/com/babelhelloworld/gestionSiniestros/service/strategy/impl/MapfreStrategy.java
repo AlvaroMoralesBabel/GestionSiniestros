@@ -5,14 +5,26 @@ import com.babelhelloworld.gestionSiniestros.models.Bien;
 import com.babelhelloworld.gestionSiniestros.models.Siniestro;
 import com.babelhelloworld.gestionSiniestros.service.amortizacion.AmortizacionService;
 import com.babelhelloworld.gestionSiniestros.service.strategy.BaseStrategy;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Service
 public class MapfreStrategy extends BaseStrategy {
 
-    public MapfreStrategy(Aseguradora aseguradora, AmortizacionService amortizacionService) {
-        super(aseguradora, amortizacionService);
+    private final Aseguradora aseguradora;
+    private final AmortizacionService amortizacionService;
+
+    public MapfreStrategy(@Qualifier("mapfreAmortizacionService") AmortizacionService amortizacionService) {
+        this.amortizacionService = amortizacionService;
+        this.aseguradora = Aseguradora.MAPFRE;
+    }
+
+    @Override
+    public Aseguradora getAseguradora() {
+        return aseguradora;
     }
 
     @Override
@@ -25,7 +37,7 @@ public class MapfreStrategy extends BaseStrategy {
             aniosAjustados = aplicarPrimerAnio(aniosAjustados, aseguradora.isCuentaPrimerAnio());
 
             int amort = aplicarMultiplicador(
-                    amortizacionService.obtenerAniosAmortizacion(aseguradora, bien.getTipo()),
+                    amortizacionService.obtenerAniosAmortizacion(bien),
                     aseguradora.getMultiplicadorAmortizacion()
             );
             double porcAnual = 1.0 / amort;
@@ -33,7 +45,7 @@ public class MapfreStrategy extends BaseStrategy {
             double depreciacion = bien.getValorCompra() * porcAnual * aniosAjustados;
             double valor = bien.getValorCompra() - depreciacion;
 
-            resultado.put(bien, aplicarValorResidual(bien.getValorCompra(), valor));
+            resultado.put(bien, aplicarValorResidual(bien.getValorCompra(), valor, aseguradora.getValorResidual()));
         }
 
         return resultado;

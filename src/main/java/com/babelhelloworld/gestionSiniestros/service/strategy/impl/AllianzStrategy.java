@@ -5,14 +5,26 @@ import com.babelhelloworld.gestionSiniestros.models.Bien;
 import com.babelhelloworld.gestionSiniestros.models.Siniestro;
 import com.babelhelloworld.gestionSiniestros.service.amortizacion.AmortizacionService;
 import com.babelhelloworld.gestionSiniestros.service.strategy.BaseStrategy;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Service
 public class AllianzStrategy extends BaseStrategy {
 
-    public AllianzStrategy(Aseguradora aseguradora, AmortizacionService amortizacionService) {
-        super(aseguradora, amortizacionService);
+    private final Aseguradora aseguradora;
+    private final AmortizacionService amortizacionService;
+
+    public AllianzStrategy(@Qualifier("allianzAmortizacionService") AmortizacionService amortizacionService) {
+        this.amortizacionService = amortizacionService;
+        this.aseguradora = Aseguradora.ALLIANZ;
+    }
+
+    @Override
+    public Aseguradora getAseguradora() {
+        return aseguradora;
     }
 
     @Override
@@ -26,7 +38,7 @@ public class AllianzStrategy extends BaseStrategy {
             int aniosEnteros = (int) aniosAjustados;
 
             int amort = aplicarMultiplicador(
-                    amortizacionService.obtenerAniosAmortizacion(aseguradora, bien.getTipo()),
+                    amortizacionService.obtenerAniosAmortizacion(bien),
                     aseguradora.getMultiplicadorAmortizacion()
             );
             double porcAnual = 1.0 / amort;

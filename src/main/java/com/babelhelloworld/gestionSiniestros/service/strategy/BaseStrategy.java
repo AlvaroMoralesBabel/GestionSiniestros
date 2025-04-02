@@ -3,23 +3,17 @@ package com.babelhelloworld.gestionSiniestros.service.strategy;
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
 import com.babelhelloworld.gestionSiniestros.models.Siniestro;
-import com.babelhelloworld.gestionSiniestros.service.amortizacion.AmortizacionService;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 public abstract class BaseStrategy implements ValoracionStrategy {
 
-    protected Aseguradora aseguradora;
-    protected AmortizacionService amortizacionService;
-
-    public BaseStrategy(Aseguradora aseguradora, AmortizacionService amortizacionService) {
-        this.aseguradora = aseguradora;
-        this.amortizacionService = amortizacionService;
-    }
-
     @Override
     public abstract Map<Bien, Double> calcularValorReal(Siniestro siniestro);
+
+    @Override
+    public abstract Aseguradora getAseguradora();
 
     /**
      * Devuelve la diferencia en años (posiblemente con decimales)
@@ -77,12 +71,11 @@ public abstract class BaseStrategy implements ValoracionStrategy {
     /**
      * Aplica valor residual según el % en la Aseguradora.
      */
-    protected double aplicarValorResidual(double valorCompra, double valorCalculado) {
-        double residualPct = aseguradora.getValorResidual();
-        if (residualPct <= 0) {
+    protected double aplicarValorResidual(double valorCompra, double valorCalculado, double valorResidual) {
+        if (valorResidual <= 0) {
             return valorCalculado;
         }
-        double residual = valorCompra * residualPct;
+        double residual = valorCompra * valorResidual;
         return Math.max(residual, valorCalculado);
     }
 }

@@ -1,97 +1,92 @@
 package com.babelhelloworld.gestionSiniestros.service.strategy.impl;
 
+import com.babelhelloworld.gestionSiniestros.exceptions.FechaInvalidaException;
 import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
 import com.babelhelloworld.gestionSiniestros.models.Bien;
 import com.babelhelloworld.gestionSiniestros.models.Siniestro;
+import com.babelhelloworld.gestionSiniestros.models.TipoBien;
+import com.babelhelloworld.gestionSiniestros.service.amortizacion.AmortizacionService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class MutuaStrategyTest {
+
+    @Mock
+    private AmortizacionService mutuaAmortizacionService;
 
     private MutuaStrategy mutuaStrategy;
 
     @BeforeEach
     void setUp() {
-        mutuaStrategy = new MutuaStrategy(Aseguradora.MUTUA);
+        mutuaStrategy = new MutuaStrategy(mutuaAmortizacionService);
     }
 
-    @Test
-    void calcularValorReal_sinUso_cuentaPrimerAño() {
+    @ParameterizedTest(name = "[{index}] {0} => valor={1}, aniosMock={2}, feCompra={3}, feSiniestro={4}, esperado={5}")
+    @CsvSource({
+            "AUTOMOVIL, 1500, 2, 2025-01-01, 2039-07-01, 150.0",
+            "INFORMATICA, 1000, 5, 2030-01-01, 2030-01-01, 900.0",
+            "ELECTRODOMESTICO, 2000, 10, 2020-01-01, 2022-01-01, 1805.0"
+    })
+    @DisplayName("MutuaStrategy: casos paramétricos con Mock de MutuaAmortizacionService")
+    void calcularValorReal_Parametrizado(
+            TipoBien tipoBien,
+            double valorCompra,
+            int aniosAmortMock,
+            String fechaCompra,
+            String fechaSiniestro,
+            double esperado
+    ) {
         // Arrange
+        Bien bien = new Bien("BienMutua", tipoBien, valorCompra, LocalDate.parse(fechaCompra));
         Siniestro siniestro = new Siniestro();
-        Bien bien = new Bien("Portátil", 1000, 5, LocalDate.of(2030, 1, 1));
-        siniestro.setBienAfectado(bien);
-        siniestro.setFechaSiniestro(LocalDate.of(2030, 1, 1));
+        siniestro.setAseguradora(Aseguradora.MUTUA);
+        siniestro.setFechaSiniestro(LocalDate.parse(fechaSiniestro));
+        siniestro.setBienesAfectados(List.of(bien));
+
+        when(mutuaAmortizacionService.obtenerAniosAmortizacion(eq(bien))).thenReturn(aniosAmortMock);
 
         // Act
-        double valorCalculado = mutuaStrategy.calcularValorReal(bien, siniestro);
+        Map<Bien, Double> resultado = mutuaStrategy.calcularValorReal(siniestro);
+        double valorCalculado = resultado.get(bien);
 
         // Assert
-        assertEquals(900.0, valorCalculado, 0.0001);
+        assertEquals(esperado, valorCalculado, 0.0001);
     }
 
-    @Test
-    void calcularValorReal_usoCompletoAmortizacion_devuelveResidual() {
-        // Arrange
+    @ParameterizedTest(name = "Caso {index} => lanza excepción si {1} < {2}")
+    @CsvSource({
+            "INFORMATICA, 2027-01-01, 2028-05-01",
+            "AUTOMOVIL, 2030-06-01, 2031-10-01"
+    })
+    @DisplayName("MutuaStrategy: lanza excepción si la fecha del siniestro es anterior a la compra")
+    void calcularValorReal_FechaInvalida(TipoBien tipoBien, String fechaSin, String fechaCompra) {
+        //Arrange
+        Bien bien = new Bien("BienErrorMutua", tipoBien, 1200.0, LocalDate.parse(fechaCompra));
         Siniestro siniestro = new Siniestro();
-        Bien bien = new Bien("Móvil", 1000, 1, LocalDate.of(2025, 1, 1));
-        siniestro.setBienAfectado(bien);
-        siniestro.setFechaSiniestro(LocalDate.of(2033, 12, 1));
+        siniestro.setAseguradora(Aseguradora.MUTUA);
+        siniestro.setFechaSiniestro(LocalDate.parse(fechaSin));
+        siniestro.setBienesAfectados(List.of(bien));
 
-        // Act
-        double valorCalculado = mutuaStrategy.calcularValorReal(bien, siniestro);
+        when(mutuaAmortizacionService.obtenerAniosAmortizacion(eq(bien))).thenReturn(5);
 
-        // Assert
-        assertEquals(100.0, valorCalculado, 0.0001);
-    }
-
-    @Test
-    void calcularValorReal_conAniosProporcionales_uso1_5_devuelveCalculoParcial() {
-        // Arrange
-        Siniestro siniestro = new Siniestro();
-        Bien bien = new Bien("Tablet", 2000, 4, LocalDate.of(2025, 1, 1));
-        siniestro.setBienAfectado(bien);
-        siniestro.setFechaSiniestro(LocalDate.of(2026, 7, 1));
-
-        // Act
-        double valorCalculado = mutuaStrategy.calcularValorReal(bien, siniestro);
-
-        // Assert
-        assertTrue(valorCalculado > 1700 && valorCalculado < 1800);
-    }
-
-    @Test
-    void calcularValorReal_variosAniosUso_caePorDebajoResidual_devuelveResidual() {
-        // Arrange
-        Siniestro siniestro = new Siniestro();
-        Bien bien = new Bien("Coche", 1500, 2, LocalDate.of(2025, 1, 1));
-        siniestro.setBienAfectado(bien);
-        siniestro.setFechaSiniestro(LocalDate.of(2035, 7, 1));
-
-        // Act
-        double valorCalculado = mutuaStrategy.calcularValorReal(bien, siniestro);
-
-        // Assert
-        assertEquals(150.0, valorCalculado, 0.0001);
-    }
-
-    @Test
-    void calcularValorReal_usoIntermedio_noSeReduceAResidual() {
-        // Arrange
-        Siniestro siniestro = new Siniestro();
-        Bien bien = new Bien("Bicicleta", 1000, 5, LocalDate.of(2025, 1, 1));
-        siniestro.setBienAfectado(bien);
-        siniestro.setFechaSiniestro(LocalDate.of(2027, 1, 1));
-
-        // Act
-        double valorCalculado = mutuaStrategy.calcularValorReal(bien, siniestro);
-
-        // Assert
-        assertEquals(810.0, valorCalculado, 0.0001);
+        // Act & Assert
+        assertThrows(FechaInvalidaException.class, () -> {
+            mutuaStrategy.calcularValorReal(siniestro);
+        });
     }
 }

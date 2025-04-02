@@ -1,8 +1,7 @@
 package com.babelhelloworld.gestionSiniestros.service.amortizacion;
 
-import com.babelhelloworld.gestionSiniestros.models.Aseguradora;
-import com.babelhelloworld.gestionSiniestros.models.TipoBien;
+import com.babelhelloworld.gestionSiniestros.models.Bien;
 
 public interface AmortizacionService {
-    public int obtenerAniosAmortizacion(Aseguradora aseguradora, TipoBien tipoBien);
+    int obtenerAniosAmortizacion(Bien bien);
 }

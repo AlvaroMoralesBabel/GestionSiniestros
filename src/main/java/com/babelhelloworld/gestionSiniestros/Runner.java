@@ -98,7 +98,7 @@ public class Runner implements CommandLineRunner {
 
             siniestro.setBienesAfectados(bienes);
 
-            double valorTotal = valoracionService.calcular(siniestro, siniestro.getAseguradora());
+            Map<Bien, Double> valorTotal = valoracionService.calcular(siniestro);
             System.out.println("\n=== RESULTADO DEL SINIESTRO ===");
             System.out.println("Poliza: " + siniestro.getNumeroPoliza());
             System.out.println("Aseguradora: " + siniestro.getAseguradora().getNombre());
