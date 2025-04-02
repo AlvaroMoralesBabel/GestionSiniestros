@@ -6,6 +6,7 @@ import com.babelhelloworld.gestionSiniestros.models.Siniestro;
 import com.babelhelloworld.gestionSiniestros.service.amortizacion.AmortizacionService;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
 public abstract class BaseStrategy implements ValoracionStrategy {
 
@@ -18,7 +19,7 @@ public abstract class BaseStrategy implements ValoracionStrategy {
     }
 
     @Override
-    public abstract double calcularValorReal(Siniestro siniestro);
+    public abstract Map<Bien, Double> calcularValorReal(Siniestro siniestro);
 
     /**
      * Devuelve la diferencia en años (posiblemente con decimales)

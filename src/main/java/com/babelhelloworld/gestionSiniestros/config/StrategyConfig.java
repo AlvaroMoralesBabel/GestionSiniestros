@@ -10,9 +10,6 @@ import com.babelhelloworld.gestionSiniestros.service.strategy.impl.MutuaStrategy
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 @Configuration
 public class StrategyConfig {
 
@@ -42,18 +39,4 @@ public class StrategyConfig {
         return new MutuaStrategy(Aseguradora.MUTUA, amortizacionService);
     }
 
-    @Bean
-    public Map<Aseguradora, ValoracionStrategy> strategyMap(
-            ValoracionStrategy generalStrategy,
-            ValoracionStrategy mapfreStrategy,
-            ValoracionStrategy allianzStrategy,
-            ValoracionStrategy mutuaStrategy
-    ) {
-        Map<Aseguradora, ValoracionStrategy> map = new EnumMap<>(Aseguradora.class);
-        map.put(Aseguradora.GENERAL, generalStrategy);
-        map.put(Aseguradora.MAPFRE, mapfreStrategy);
-        map.put(Aseguradora.ALLIANZ, allianzStrategy);
-        map.put(Aseguradora.MUTUA, mutuaStrategy);
-        return map;
-    }
 }
